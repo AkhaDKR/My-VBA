@@ -3,5 +3,5 @@ Sub Stations_Branch()
  Dim wS as worksheet
  Dim arrData()
  Set wB=thisworkbook
- 
+ Redim arrData(1 to 100) 'Delete this row
 End sub
