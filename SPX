@@ -1,0 +1,55 @@
+Sub data_download()
+    Call delete_xlsx_file
+    Dim myURL As String
+    Dim myTO As String
+    Dim lr As Long
+    Dim download_DONE As Boolean
+    Dim files_Count As Long
+    Dim arr()
+    Dim arr_FileName()
+'    Dim FSO As Object
+'    Set FSO = CreateObject("Scripting.FileSystemObject")
+    Dim FSO As New FileSystemObject
+    Dim my_File As file
+    Dim msgboxResult As VbMsgBoxResult
+    files_Count = 0
+    download_DONE = False
+    lr = Get_Lr(sTO, 1)
+    ReDim arr_FileName(1 To lr, 1 To 1)
+    If sTO.Range("A1").Value = "" Or Left(UCase(sTO.Range("A1").Value), 2) <> "TO" Then
+        MsgBox "Range A1 must be a TO"
+        Exit Sub
+    End If
+    arr = sTO.Range("A1:B" & lr).Value
+    For i = 1 To lr
+        myTO = arr(i, 1)
+        myURL = "https://spx.shopee.vn/api/in-station/general_to/detail/export?to_number=" & myTO
+        Shell ("C:\Program Files (x86)\Google\Chrome\Application\chrome.exe -url " & myURL)
+    Next i
+    Do
+        For Each my_File In FSO.GetFolder("C:\Users\SPXVN10751\Downloads").Files
+            If Right(my_File.Name, 4) = "xlsx" Then
+                files_Count = files_Count + 1
+                arr_FileName(files_Count, 1) = my_File.Name
+            End If
+        Next my_File
+        If files_Count = lr Then
+            download_DONE = True
+        End If
+        If Not download_DONE Then
+            msgboxResult = MsgBox("Your data is downloading, Please wait!", vbYesNo + vbInformation, "Alert")
+            If msgboxResult = vbNo Then
+                Exit Sub
+            End If
+        End If
+        
+    Loop Until download_DONE
+    MsgBox "Download is Done!"
+End Sub
+Sub delete_xlsx_file()
+    On Error Resume Next
+    Kill "C:\Users\SPXVN10751\Downloads\*.xlsx"
+End Sub
+Sub check_file()
+
+End Sub
