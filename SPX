@@ -1,42 +1,45 @@
 Sub data_download()
-application.screenupdating=false
-application.calculation=xlCalculationManual
-
-'Dim wb as workbook
+Application.ScreenUpdating = False
+Application.Calculation = xlCalculationManual
+    
+    Dim wb As Workbook
     Dim myURL As String
     Dim myTO As String
     Dim lr As Long
-    Dim user_Name as String
-'Dim downldFldr as string
+    Dim user_Name As String
+    Dim downldFldr As String
     Dim download_DONE As Boolean
     Dim files_Count As Long
     Dim arr()
     Dim arr_FileName()
-'    Dim FSO As Object
-'    Set FSO = CreateObject("Scripting.FileSystemObject")
+    'Dim FSO As Object
+    'Set FSO = CreateObject("Scripting.FileSystemObject")
     Dim FSO As New FileSystemObject
     Dim my_File As Scripting.file
-'myDict as object
-'set myDict=CreateObject("Scripting.Dictionary")
-'Dim masterFldr as Scripting.Folder
-'Dim subFldr as Scripting.Folder
-'Set masterFldr=FSO.getfolder("C:\Users")
-'for each subFldr in masterFldr.subfolder
-'   if left(subFldr.name,3)="SPX" then
-'      user_Name=subFldr.name
-'      exit for
-'   end if
-'next subFldr
-'if user_Name="" then
-'   exit sub
-'end if
-'downldFldr="C:\Users\" & user_Name & "\Downloads"
-'On Error Resume Next
-'Kill downldFldr & "\*.xlsx"
-'On Error Goto 0
-
+'    Dim myDict As Object
+'    Set myDict = CreateObject("Scripting.Dictionary")
+    Dim myDict As Scripting.Dictionary
+    Set myDict = New Scripting.Dictionary
+    Dim masterFldr As Scripting.Folder
+    Dim subFldr As Scripting.Folder
     Dim msgboxResult As VbMsgBoxResult
-    files_Count = 0
+    
+    
+    Set masterFldr = FSO.GetFolder("C:\Users")
+    For Each subFldr In masterFldr.SubFolders
+        If Left(subFldr.Name, 3) = "SPX" Then
+            user_Name = subFldr.Name
+            Exit For
+        End If
+    Next subFldr
+    If user_Name = "" Then
+       Exit Sub
+    End If
+    downldFldr = "C:\Users\" & user_Name & "\Downloads"
+    On Error Resume Next
+    Kill downldFldr & "\*.xlsx"
+    On Error GoTo 0
+
     download_DONE = False
     lr = Get_Lr(sTO, 1)
     ReDim arr_FileName(1 To lr, 1 To 1)
@@ -51,6 +54,7 @@ application.calculation=xlCalculationManual
         Shell ("C:\Program Files (x86)\Google\Chrome\Application\chrome.exe -url " & myURL)
     Next i
     Do
+        files_Count = 0
         For Each my_File In FSO.GetFolder(downldFldr).Files
             If Right(my_File.Name, 4) = "xlsx" Then
                 files_Count = files_Count + 1
@@ -70,17 +74,23 @@ application.calculation=xlCalculationManual
     Loop Until download_DONE
     MsgBox "Download is Done!"
 
-'For i=1 to files_Count
-'   set wb=workbooks.open(downldFldr & "\" & arr_Filename(i,1))
-'   myTO=wb.sheets(1).range("B1").value
-'   For j=1 to lr
-'      if myTO=arr(j,1) then
-'         arr(j,3)=wb.sheets(1).range("B5").value
-'         
-'      end if
-'   mext j
-'next i
-
+    For i = 1 To files_Count
+        Set wb = Workbooks.Open(downldFldr & "\" & arr_FileName(i, 1))
+        myTO = wb.Sheets(1).Range("B1").Value
+        For j = 1 To lr
+            If myTO = arr(j, 1) Then
+                arr(j, 3) = wb.Sheets(1).Range("B5").Value
+                If Not myDict.Exists(arr(j, 3)) Then
+                    myDict.Add arr(j, 3), 1
+                Else
+                    myDict(arr(j, 3)) = myDict(arr(j, 3)) + 1
+                End If
+                wb.Close False
+                Exit For
+            End If
+       Next j
+    Next i
+    
 Application.Calculation = xlCalculationAutomatic
-application.screenupdating=true
+Application.ScreenUpdating = True
 End Sub
