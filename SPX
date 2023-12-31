@@ -44,6 +44,8 @@ Application.Calculation = xlCalculationManual
     On Error GoTo 0
     If Not FSO.FolderExists(downldFldr & "\HV Team-BN B Mega SOC") Then
         FSO.CreateFolder (downldFldr & "\HV Team-BN B Mega SOC")
+    Else
+        Kill downldFldr & "\HV Team-BN B Mega SOC\*.*"
     End If
     download_DONE = False
     lr = Get_Lr(sTO, 1)
@@ -95,12 +97,28 @@ Application.Calculation = xlCalculationManual
             End If
        Next j
     Next i
+    Dim cur_Time As Date
     For Each mKey In myDict.Keys
-        ReDim arr_Result(1 To myDict(mKey), 1 To 4)
+        cur_Time = Now()
+        i = 1
+        ReDim arr_Result(1 To myDict(mKey), 1 To 5)
         Set wb = Workbooks.Add
         For k = 1 To lr
-            
+            If arr(k, 3) = mKey Then
+                arr_Result(i, 1) = i
+                arr_Result(i, 2) = arr(k, 1)
+                arr_Result(i, 3) = arr(k, 2)
+                arr_Result(i, 4) = arr(k, 3)
+                arr_Result(i, 5) = cur_Time
+                i = i + 1
+                If i >= myDict(mKey) Then
+                    Exit For
+                End If
+            End If
         Next k
+        wb.Sheets(1).Range("A11").Resize(myDict(mKey), 5).Value = arr_Result
+        wb.SaveAs Filename:=downldFldr & "\HV Team-BN B Mega SOC\" & mKey & ".xlsx"
+        wb.Close False
     Next mKey
 Application.Calculation = xlCalculationAutomatic
 Application.ScreenUpdating = True
