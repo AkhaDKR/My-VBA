@@ -3,6 +3,7 @@ Application.ScreenUpdating = False
 Application.Calculation = xlCalculationManual
     
     Dim wb As Workbook
+'    Dim twb As Workbook
     Dim myURL As String
     Dim myTO As String
     Dim lr As Long
@@ -26,7 +27,7 @@ Application.Calculation = xlCalculationManual
     Dim masterFldr As Scripting.Folder
     Dim subFldr As Scripting.Folder
     Dim msgboxResult As VbMsgBoxResult
-    
+'    Set twb = ThisWorkbook
     
     Set masterFldr = FSO.GetFolder("C:\Users")
     For Each subFldr In masterFldr.SubFolders
@@ -45,7 +46,9 @@ Application.Calculation = xlCalculationManual
     If Not FSO.FolderExists(downldFldr & "\HV Team-BN B Mega SOC") Then
         FSO.CreateFolder (downldFldr & "\HV Team-BN B Mega SOC")
     Else
+        On Error Resume Next
         Kill downldFldr & "\HV Team-BN B Mega SOC\*.*"
+        On Error GoTo 0
     End If
     download_DONE = False
     lr = Get_Lr(sTO, 1)
@@ -98,11 +101,14 @@ Application.Calculation = xlCalculationManual
        Next j
     Next i
     Dim cur_Time As Date
+    Application.DisplayAlerts = False
     For Each mKey In myDict.Keys
         cur_Time = Now()
         i = 1
         ReDim arr_Result(1 To myDict(mKey), 1 To 5)
         Set wb = Workbooks.Add
+        sPrtForm.Copy before:=wb.Sheets(1)
+        wb.Sheets(2).Delete
         For k = 1 To lr
             If arr(k, 3) = mKey Then
                 arr_Result(i, 1) = i
@@ -120,6 +126,11 @@ Application.Calculation = xlCalculationManual
         wb.SaveAs Filename:=downldFldr & "\HV Team-BN B Mega SOC\" & mKey & ".xlsx"
         wb.Close False
     Next mKey
+    Application.DisplayAlerts = True
+    Set FSO = Nothing
+    Set myDict = Nothing
+    Set wb = Nothing
+    Shell "explorer.exe" & " " & downldFldr & "\HV Team-BN B Mega SOC", vbNormalFocus
 Application.Calculation = xlCalculationAutomatic
 Application.ScreenUpdating = True
 End Sub
