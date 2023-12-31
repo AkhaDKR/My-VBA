@@ -123,6 +123,7 @@ Application.Calculation = xlCalculationManual
             End If
         Next k
         wb.Sheets(1).Range("A11").Resize(myDict(mKey), 5).Value = arr_Result
+        wb.Sheets(1).Columns("A:E").EntireColumn.AutoFit
         wb.SaveAs Filename:=downldFldr & "\HV Team-BN B Mega SOC\" & mKey & ".xlsx"
         wb.Close False
     Next mKey
