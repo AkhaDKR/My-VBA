@@ -1,8 +1,13 @@
 Sub data_download()
-    Call delete_xlsx_file
+application.screenupdating=false
+application.calculation=xlCalculationManual
+
+'Dim wb as workbook
     Dim myURL As String
     Dim myTO As String
     Dim lr As Long
+    Dim user_Name as String
+'Dim downldFldr as string
     Dim download_DONE As Boolean
     Dim files_Count As Long
     Dim arr()
@@ -10,7 +15,24 @@ Sub data_download()
 '    Dim FSO As Object
 '    Set FSO = CreateObject("Scripting.FileSystemObject")
     Dim FSO As New FileSystemObject
-    Dim my_File As file
+    Dim my_File As Scripting.file
+'Dim masterFldr as Scripting.Folder
+'Dim subFldr as Scripting.Folder
+'Set masterFldr=FSO.getfolder("C:\Users")
+'for each subFldr in masterFldr.subfolder
+'   if left(subFldr.name,3)="SPX" then
+'      user_Name=subFldr.name
+'      exit for
+'   end if
+'next subFldr
+'if user_Name="" then
+'   exit sub
+'end if
+'downldFldr="C:\Users\" & user_Name & "\Downloads"
+'On Error Resume Next
+'Kill downldFldr & "\*.xlsx"
+'On Error Goto 0
+
     Dim msgboxResult As VbMsgBoxResult
     files_Count = 0
     download_DONE = False
@@ -27,7 +49,7 @@ Sub data_download()
         Shell ("C:\Program Files (x86)\Google\Chrome\Application\chrome.exe -url " & myURL)
     Next i
     Do
-        For Each my_File In FSO.GetFolder("C:\Users\SPXVN10751\Downloads").Files
+        For Each my_File In FSO.GetFolder(downldFldr).Files
             If Right(my_File.Name, 4) = "xlsx" Then
                 files_Count = files_Count + 1
                 arr_FileName(files_Count, 1) = my_File.Name
@@ -45,11 +67,12 @@ Sub data_download()
         
     Loop Until download_DONE
     MsgBox "Download is Done!"
-End Sub
-Sub delete_xlsx_file()
-    On Error Resume Next
-    Kill "C:\Users\SPXVN10751\Downloads\*.xlsx"
-End Sub
-Sub check_file()
 
+'For i=1 to files_Count
+'   set wb=workbooks.open(downldFldr & "\" & arr_Filename(i,1))
+'   
+'next i
+
+Application.Calculation = xlCalculationAutomatic
+application.screenupdating=true
 End Sub
