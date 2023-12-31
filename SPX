@@ -12,6 +12,9 @@ Application.Calculation = xlCalculationManual
     Dim files_Count As Long
     Dim arr()
     Dim arr_FileName()
+    Dim arr_Result()
+    Dim mKey As Variant
+    Dim mItem As Variant
     'Dim FSO As Object
     'Set FSO = CreateObject("Scripting.FileSystemObject")
     Dim FSO As New FileSystemObject
@@ -39,7 +42,9 @@ Application.Calculation = xlCalculationManual
     On Error Resume Next
     Kill downldFldr & "\*.xlsx"
     On Error GoTo 0
-
+    If Not FSO.FolderExists(downldFldr & "\HV Team-BN B Mega SOC") Then
+        FSO.CreateFolder (downldFldr & "\HV Team-BN B Mega SOC")
+    End If
     download_DONE = False
     lr = Get_Lr(sTO, 1)
     ReDim arr_FileName(1 To lr, 1 To 1)
@@ -47,7 +52,7 @@ Application.Calculation = xlCalculationManual
         MsgBox "Range A1 must be a TO"
         Exit Sub
     End If
-    arr = sTO.Range("A1:D" & lr).Value
+    arr = sTO.Range("A1:C" & lr).Value
     For i = 1 To lr
         myTO = arr(i, 1)
         myURL = "https://spx.shopee.vn/api/in-station/general_to/detail/export?to_number=" & myTO
@@ -90,7 +95,13 @@ Application.Calculation = xlCalculationManual
             End If
        Next j
     Next i
-    
+    For Each mKey In myDict.Keys
+        ReDim arr_Result(1 To myDict(mKey), 1 To 4)
+        Set wb = Workbooks.Add
+        For k = 1 To lr
+            
+        Next k
+    Next mKey
 Application.Calculation = xlCalculationAutomatic
 Application.ScreenUpdating = True
 End Sub
