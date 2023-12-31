@@ -16,6 +16,8 @@ application.calculation=xlCalculationManual
 '    Set FSO = CreateObject("Scripting.FileSystemObject")
     Dim FSO As New FileSystemObject
     Dim my_File As Scripting.file
+'myDict as object
+'set myDict=CreateObject("Scripting.Dictionary")
 'Dim masterFldr as Scripting.Folder
 'Dim subFldr as Scripting.Folder
 'Set masterFldr=FSO.getfolder("C:\Users")
@@ -42,7 +44,7 @@ application.calculation=xlCalculationManual
         MsgBox "Range A1 must be a TO"
         Exit Sub
     End If
-    arr = sTO.Range("A1:B" & lr).Value
+    arr = sTO.Range("A1:D" & lr).Value
     For i = 1 To lr
         myTO = arr(i, 1)
         myURL = "https://spx.shopee.vn/api/in-station/general_to/detail/export?to_number=" & myTO
@@ -70,7 +72,13 @@ application.calculation=xlCalculationManual
 
 'For i=1 to files_Count
 '   set wb=workbooks.open(downldFldr & "\" & arr_Filename(i,1))
-'   
+'   myTO=wb.sheets(1).range("B1").value
+'   For j=1 to lr
+'      if myTO=arr(j,1) then
+'         arr(j,3)=wb.sheets(1).range("B5").value
+'         
+'      end if
+'   mext j
 'next i
 
 Application.Calculation = xlCalculationAutomatic
