@@ -104,19 +104,23 @@ Application.Calculation = xlCalculationManual
     Application.DisplayAlerts = False
     For Each mKey In myDict.Keys
         cur_Time = Now()
-        i = 1
+        i = 0
+Bulky=0
         ReDim arr_Result(1 To myDict(mKey), 1 To 5)
         Set wb = Workbooks.Add
         sPrtForm.Copy before:=wb.Sheets(1)
         wb.Sheets(2).Delete
         For k = 1 To lr
             If arr(k, 3) = mKey Then
+if not isnumeric(arr(k,2)) then
+Bulky=Bulky+1
+end if
+i=i+1
                 arr_Result(i, 1) = i
                 arr_Result(i, 2) = arr(k, 1)
                 arr_Result(i, 3) = arr(k, 2)
                 arr_Result(i, 4) = arr(k, 3)
                 arr_Result(i, 5) = cur_Time
-                i = i + 1
                 If i >= myDict(mKey) Then
                     Exit For
                 End If
@@ -124,7 +128,7 @@ Application.Calculation = xlCalculationManual
         Next k
         wb.Sheets(1).Range("A11").Resize(myDict(mKey), 5).Value = arr_Result
         wb.Sheets(1).Columns("A:E").EntireColumn.AutoFit
-        wb.SaveAs Filename:=downldFldr & "\HV Team-BN B Mega SOC\" & mKey & ".xlsx"
+        wb.SaveAs Filename:=downldFldr & "\HV Team-BN B Mega SOC\GTC-" & mKey & ".xlsx"
         wb.Close False
     Next mKey
     Application.DisplayAlerts = True
