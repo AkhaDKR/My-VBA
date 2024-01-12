@@ -1,0 +1,17 @@
+Sub create_sheets_Intra()
+Dim lr As Long
+lr = Get_Lr(Sheet4, 1)
+If Sheet4.Range("A" & lr).Value = "" Then
+    Exit Sub
+End If
+Dim arr()
+Dim wb As Workbook
+Dim ws As Worksheet
+arr = Sheet4.Range("A1:C" & lr).Value
+Set wb = Workbooks.Add
+    BBBG.Copy before:=wb.Sheets(1)
+    wb.Sheets(2).Delete
+    wb.Sheets(1).Columns("A:E").EntireColumn.AutoFit
+    wb.SaveAs Filename:=downldFldr & "\HV Team-BN B Mega SOC\GTC-" & mKey & ".xlsx"
+    wb.Close False
+End Sub
