@@ -4,6 +4,17 @@ lr = Get_Lr(Sheet4, 1)
 If Sheet4.Range("A" & lr).Value = "" Then
     Exit Sub
 End If
+dim cur_Time as date
+dim shifts_Name as string
+cur_Time=now()
+if Hour(cur_Time)>=9 and Hour(cur_Time)<=20 then
+   shifts_Name="S5"
+else
+   shifts_Name="N2"
+end if
+dim FSO as object
+set FSO=createobject("Scripting.FileSystemObject")
+
 Dim arr()
 Dim wb As Workbook
 Dim ws As Worksheet
