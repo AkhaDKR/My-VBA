@@ -8,9 +8,13 @@ dim cur_Time as date
 dim shifts_Name as string
 cur_Time=now()
 if Hour(cur_Time)>=9 and Hour(cur_Time)<=20 then
-   shifts_Name="S5"
+   shifts_Name="INTRA S5 " & DAY(cur_time) & "-" & month(cur_time) & "-" & year(cur_time)
 else
-   shifts_Name="N2"
+   if hour(cur_time) >=0 then
+      shifts_Name="INTRA N2 " & DAY(cur_time-1) & "-" & month(cur_time-1) & "-" & year(cur_time-1)
+   else
+      shifts_Name="INTRA N2 " & DAY(cur_time) & "-" & month(cur_time) & "-" & year(cur_time)
+   end if
 end if
 dim FSO as object
 set FSO=createobject("Scripting.FileSystemObject")
