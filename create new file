@@ -1,32 +1,48 @@
-Sub create_sheets_Intra()
 Dim lr As Long
 lr = Get_Lr(Sheet4, 1)
 If Sheet4.Range("A" & lr).Value = "" Then
     Exit Sub
 End If
-dim cur_Time as date
-dim shifts_Name as string
-cur_Time=now()
-if Hour(cur_Time)>=9 and Hour(cur_Time)<=20 then
-   shifts_Name="INTRA S5 " & DAY(cur_time) & "-" & month(cur_time) & "-" & year(cur_time)
-else
-   if hour(cur_time) >=0 then
-      shifts_Name="INTRA N2 " & DAY(cur_time-1) & "-" & month(cur_time-1) & "-" & year(cur_time-1)
-   else
-      shifts_Name="INTRA N2 " & DAY(cur_time) & "-" & month(cur_time) & "-" & year(cur_time)
-   end if
-end if
-dim FSO as object
-set FSO=createobject("Scripting.FileSystemObject")
+Dim cur_Time As Date
+Dim shifts_Name As String
+cur_Time = Now()
+If Hour(cur_Time) >= 9 And Hour(cur_Time) <= 20 Then
+   shifts_Name = "INTRA S5 " & Day(cur_Time) & "-" & Month(cur_Time) & "-" & Year(cur_Time)
+Else
+   If Hour(cur_Time) >= 0 Then
+      shifts_Name = "INTRA N2 " & Day(cur_Time - 1) & "-" & Month(cur_Time - 1) & "-" & Year(cur_Time - 1)
+   Else
+      shifts_Name = "INTRA N2 " & Day(cur_Time) & "-" & Month(cur_Time) & "-" & Year(cur_Time)
+   End If
+End If
+Dim FSO As Object
+Set FSO = CreateObject("Scripting.FileSystemObject")
 
-Dim arr()
+Dim BBBG_folder As String
+BBBG_folder = "C:\Users\SPXVN10751\Downloads\BBBG GTC"
+Dim arr_1()
+Dim arr_2()
+
 Dim wb As Workbook
 Dim ws As Worksheet
-arr = Sheet4.Range("A1:C" & lr).Value
-Set wb = Workbooks.Add
+If Not FSO.FolderExists(BBBG_folder) Then
+    FSO.CreateFolder (BBBG_folder)
+End If
+arr_1 = Sheet4.Range("A1:B" & lr).Value
+arr_2 = Sheet4.Range("C1:D" & lr).Value
+
+If FSO.FileExists(BBBG_folder & "\" & shifts_Name & ".xlsx") Then
+    Set wb = Workbooks.Open(BBBG_folder & "\" & shifts_Name & ".xlsx")
+    Dim lr_s1 As Long
+    lr_s1 = Get_Lr(wb.Sheets(1), 1)
+    wb.Sheets(1).Range("B" & lr + 1).Resize(LBound(arr_1, 1), 2).Value = arr_1
+    wb.Sheets(1).Range("E" & lr + 1).Resize(LBound(arr_2, 1), 2).Value = arr_2
+Else
+    Set wb = Workbooks.Add
     BBBG.Copy before:=wb.Sheets(1)
     wb.Sheets(2).Delete
     wb.Sheets(1).Columns("A:E").EntireColumn.AutoFit
-    wb.SaveAs Filename:=downldFldr & "\HV Team-BN B Mega SOC\GTC-" & mKey & ".xlsx"
+    wb.SaveAs Filename:=BBBG_folder & "\" & shifts_Name & ".xlsx"
     wb.Close False
+End If
 End Sub
