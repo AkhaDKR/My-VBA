@@ -1,107 +1,14 @@
-Sub Duplicate_check()
-Dim lr As Long
-lr = Sheet4.Range("A" & Rows.Count).End(xlUp).Row
-If lr > 1 Then
-    is_Duplicate = False
-    Dim my_String As String
-    Dim start_Char As String
-    Dim arr() As Variant
-    my_String = UCase(Sheet4.Range("A" & lr).Value)
-    start_Char = Left(my_String, 2)
-    
-    arr = Sheet4.Range("A1:B" & lr - 1).Value
-    If start_Char = "TO" Then
-        For i = 1 To lr - 1
-            If UCase(arr(i, 1)) = my_String Then
-                is_Duplicate = True
-                Exit Sub
-            End If
-        Next i
-    Else
-        For i = 1 To lr - 1
-            If UCase(arr(i, 2)) = my_String Then
-                is_Duplicate = True
-                Exit Sub
-            End If
-        Next i
-    End If
-End If
-End Sub
-Sub ConvertJSON()
-Dim startPosition As Long
-Dim currentPosition As Long
-Dim endPosition As Long
-Dim loopCount As Variant
-Dim totalIndexPosition As Long
-Dim myString As String
-Dim arrHeader(1 To 7)
-Dim arrResult()
-UserForm2.Show
-currentPosition = 1
-myString = jsonString
-If myString = "" Then
-    Exit Sub
-End If
-totalIndexPosition = InStr(1, myString, "total", 0) + 7
-loopCount = Mid(myString, totalIndexPosition, Len(myString) - totalIndexPosition - 1) * 1
-arrHeader(1) = "to_number"
-arrHeader(2) = "current_station_name"
-arrHeader(3) = "ctime"
-arrHeader(4) = "operator"
-arrHeader(5) = "receiver"
-arrHeader(6) = "transfer_direction"
-arrHeader(7) = "quantity"
-ReDim arrResult(1 To loopCount, 1 To 7)
-For i = 1 To loopCount
-For j = 1 To 7
-If j = 3 Or j = 7 Then
-startPosition = InStr(currentPosition, myString, arrHeader(j), 0) + Len(arrHeader(j)) + 2
-endPosition = InStr(startPosition, myString, ",", 0)
-Else
-startPosition = InStr(currentPosition, myString, arrHeader(j), 0) + Len(arrHeader(j)) + 3
-endPosition = InStr(startPosition, myString, ",", 0) - 1
-End If
-
-currentPosition = endPosition
-arrResult(i, j) = Mid(myString, startPosition, endPosition - startPosition)
-Next j
-Next i
-Application.Calculation = xlCalculationManual
-Application.ScreenUpdating = False
-JsonData.Range("A1").Resize(1, 7).Value = arrHeader
-JsonData.Range("A2").Resize(loopCount, 7).Value = arrResult
-Application.Calculation = xlCalculationAutomatic
-Application.ScreenUpdating = True
-End Sub
-Sub check_Bulky()
-Dim lr As Long
-lr = Get_Lr(Sheet4, 1)
-If Sheet4.Range("A" & lr).Value = "" Then
-    Exit Sub
-End If
-Dim Bulky As Integer
-Dim non_Bulky As Integer
-Dim arr()
-Bulky = 0
-non_Bulky = 0
-arr = Sheet4.Range("A1:B" & lr).Value
-For i = 1 To lr
-    If IsNumeric(arr(i, 2)) Then
-        Bulky = Bulky + 1
-    Else
-        non_Bulky = non_Bulky + 1
-    End If
-Next i
-End Sub
 Sub create_sheets_Intra()
 Dim lr As Long
 lr = Get_Lr(Sheet4, 1)
 If Sheet4.Range("A" & lr).Value = "" Then
     Exit Sub
 End If
+Application.ScreenUpdating = False
+Application.Calculation = xlCalculationManual
 Dim cur_Time As Date
 Dim shifts_Name As String
-cur_Time = Now()-(30/(24*60))
+cur_Time = Now() - (30 / (24 * 60))
 If Hour(cur_Time) >= 9 And Hour(cur_Time) <= 21 Then
    shifts_Name = "INTRA S5 " & Day(cur_Time) & "-" & Month(cur_Time) & "-" & Year(cur_Time)
 Else
@@ -116,7 +23,7 @@ Set FSO = CreateObject("Scripting.FileSystemObject")
 
 Dim BBBG_folder As String
 BBBG_folder = "C:\Users\SPXVN10751\Downloads\BBBG GTC"
-dim arr_0()
+Dim arr_0()
 Dim arr_1()
 Dim arr_2()
 
@@ -132,24 +39,34 @@ If FSO.FileExists(BBBG_folder & "\" & shifts_Name & ".xlsx") Then
     Set wb = Workbooks.Open(BBBG_folder & "\" & shifts_Name & ".xlsx")
     Dim lr_s1 As Long
     lr_s1 = Get_Lr(wb.Sheets(1), 1)
-   redim arr_0(1 to ubound(arr_1,1),1 to 1)
-   for i=1 to ubound(arr_1,1)
-      arr_0(i,1)=i+(lr_s1-10)
-   next i
-   wb.Sheets(1).Range("A" & lr_s1 + 1).Resize(UBound(arr_1, 1), 1).Value = arr_0
     wb.Sheets(1).Range("B" & lr_s1 + 1).Resize(UBound(arr_1, 1), 2).Value = arr_1
     wb.Sheets(1).Range("E" & lr_s1 + 1).Resize(UBound(arr_2, 1), 1).Value = arr_2
-   wb.Sheets(1).Columns("A:E").EntireColumn.AutoFit
+    lr_s1 = Get_Lr(wb.Sheets(1), 1)
+    On Error Resume Next
+    wb.Sheets(1).Range("B11:B" & lr_s1).SpecialCells(xlCellTypeBlanks).EntireRow.Delete
+    On Error GoTo 0
+    lr_s1 = Get_Lr(wb.Sheets(1), 1)
+    
+   ReDim arr_0(1 To lr_s1 - 10, 1 To 1)
+   For i = 1 To lr_s1 - 10
+      arr_0(i, 1) = i + (lr_s1 - 11)
+   Next i
+   
+    wb.Sheets(1).Range("A" & lr_s1 + 1).Resize(UBound(arr_1, 1), 1).Value = arr_0
+    Call format_RANGE(wb, lr_s1)
+    wb.Sheets(1).Columns("A:E").EntireColumn.AutoFit
     wb.Save
     wb.Close
 Else
     Set wb = Workbooks.Add
     BBBG.Copy before:=wb.Sheets(1)
+    Application.DisplayAlerts = False
     wb.Sheets(2).Delete
-   redim arr_0(1 to ubound(arr_1,1),1 to 1)
-   for i=1 to ubound(arr_1,1)
-      arr_0(i,1)=i
-   next i
+    Application.DisplayAlerts = True
+   ReDim arr_0(1 To UBound(arr_1, 1), 1 To 1)
+   For i = 1 To UBound(arr_1, 1)
+      arr_0(i, 1) = i
+   Next i
    wb.Sheets(1).Range("A11").Resize(UBound(arr_1, 1), 1).Value = arr_0
     wb.Sheets(1).Range("B11").Resize(UBound(arr_1, 1), 2).Value = arr_1
     wb.Sheets(1).Range("E11").Resize(UBound(arr_2, 1), 1).Value = arr_2
@@ -157,4 +74,7 @@ Else
     wb.SaveAs Filename:=BBBG_folder & "\" & shifts_Name & ".xlsx"
     wb.Close
 End If
+Call Clear_Data
+Application.Calculation = xlCalculationAutomatic
+Application.ScreenUpdating = True
 End Sub
