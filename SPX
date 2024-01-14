@@ -1,141 +1,97 @@
-Sub data_download()
-Application.ScreenUpdating = False
-Application.Calculation = xlCalculationManual
+Private Sub Worksheet_Change(ByVal Target As Range)
+If Not is_Swap Then
+    If Target.Column = 1 And Target.Value <> "" Then
     
-    Dim wb As Workbook
-'    Dim twb As Workbook
-    Dim myURL As String
-    Dim myTO As String
-    Dim lr As Long
-    Dim user_Name As String
-    Dim downldFldr As String
-    Dim download_DONE As Boolean
-    Dim files_Count As Long
-    Dim arr()
-    Dim arr_FileName()
-    Dim arr_Result()
-    Dim mKey As Variant
-    Dim mItem As Variant
-    'Dim FSO As Object
-    'Set FSO = CreateObject("Scripting.FileSystemObject")
-    Dim FSO As New FileSystemObject
-    Dim my_File As Scripting.file
-'    Dim myDict As Object
-'    Set myDict = CreateObject("Scripting.Dictionary")
-    Dim myDict As Scripting.Dictionary
-    Set myDict = New Scripting.Dictionary
-    Dim masterFldr As Scripting.Folder
-    Dim subFldr As Scripting.Folder
-    Dim msgboxResult As VbMsgBoxResult
-'    Set twb = ThisWorkbook
     
-    Set masterFldr = FSO.GetFolder("C:\Users")
-    For Each subFldr In masterFldr.SubFolders
-        If Left(subFldr.Name, 3) = "SPX" Then
-            user_Name = subFldr.Name
-            Exit For
-        End If
-    Next subFldr
-    If user_Name = "" Then
-       Exit Sub
+    Call Duplicate_check
+    If is_Duplicate Then
+    Call PlayDuplicateSound
+    Target.Clear
+    Target.Select
+    Exit Sub
     End If
-    downldFldr = "C:\Users\" & user_Name & "\Downloads"
-    On Error Resume Next
-    Kill downldFldr & "\*.xlsx"
-    On Error GoTo 0
-    If Not FSO.FolderExists(downldFldr & "\HV Team-BN B Mega SOC") Then
-        FSO.CreateFolder (downldFldr & "\HV Team-BN B Mega SOC")
-    Else
-        On Error Resume Next
-        Kill downldFldr & "\HV Team-BN B Mega SOC\*.*"
-        On Error GoTo 0
-    End If
-    download_DONE = False
-    lr = Get_Lr(sTO, 1)
-    ReDim arr_FileName(1 To lr, 1 To 1)
-    If sTO.Range("A1").Value = "" Or Left(UCase(sTO.Range("A1").Value), 2) <> "TO" Then
-        MsgBox "Range A1 must be a TO"
-        Exit Sub
-    End If
-    arr = sTO.Range("A1:C" & lr).Value
-    For i = 1 To lr
-        myTO = arr(i, 1)
-        myURL = "https://spx.shopee.vn/api/in-station/general_to/detail/export?to_number=" & myTO
-        Shell ("C:\Program Files (x86)\Google\Chrome\Application\chrome.exe -url " & myURL)
-    Next i
-    Do
-        files_Count = 0
-        For Each my_File In FSO.GetFolder(downldFldr).Files
-            If Right(my_File.Name, 4) = "xlsx" Then
-                files_Count = files_Count + 1
-                arr_FileName(files_Count, 1) = my_File.Name
-            End If
-        Next my_File
-        If files_Count = lr Then
-            download_DONE = True
-        End If
-        If Not download_DONE Then
-            msgboxResult = MsgBox("Your data is downloading, Please wait!", vbYesNo + vbInformation, "Alert")
-            If msgboxResult = vbNo Then
-                Exit Sub
-            End If
-        End If
-        
-    Loop Until download_DONE
-    MsgBox "Download is Done!"
-
-    For i = 1 To files_Count
-        Set wb = Workbooks.Open(downldFldr & "\" & arr_FileName(i, 1))
-        myTO = wb.Sheets(1).Range("B1").Value
-        For j = 1 To lr
-            If myTO = arr(j, 1) Then
-                arr(j, 3) = wb.Sheets(1).Range("B5").Value
-                If Not myDict.Exists(arr(j, 3)) Then
-                    myDict.Add arr(j, 3), 1
-                Else
-                    myDict(arr(j, 3)) = myDict(arr(j, 3)) + 1
-                End If
-                wb.Close False
-                Exit For
-            End If
-       Next j
-    Next i
+    
+    
+    
+    Application.Calculation = xlcalculatonmanual
+    Application.ScreenUpdating = False
+    
     Dim cur_Time As Date
-    Application.DisplayAlerts = False
-    For Each mKey In myDict.Keys
+    Dim my_String As String
+    Dim input_String As String
+    Dim start_Char As String
+    Dim lr As Long
+    Dim arr_Data()
+    Dim data_Exist As Boolean
+    my_String = UCase(Target.Value)
+    start_Char = Left(my_String, 2)
+    lr = Sheet5.Range("A" & Rows.Count).End(xlUp).Row
+    arr_Data = Sheet5.Range("A1:B" & lr).Value
+    data_Exist = False
+        If start_Char = "TO" Then
+        For i = 1 To lr
+        If UCase(arr_Data(i, 1)) = my_String Then
+        Call playdingsound
+        data_Exist = True
+        Target.Offset(0, 1).Value = arr_Data(i, 2)
         cur_Time = Now()
-        i = 0
-Bulky=0
-        ReDim arr_Result(1 To myDict(mKey), 1 To 5)
-        Set wb = Workbooks.Add
-        sPrtForm.Copy before:=wb.Sheets(1)
-        wb.Sheets(2).Delete
-        For k = 1 To lr
-            If arr(k, 3) = mKey Then
-if not isnumeric(arr(k,2)) then
-Bulky=Bulky+1
-end if
-i=i+1
-                arr_Result(i, 1) = i
-                arr_Result(i, 2) = arr(k, 1)
-                arr_Result(i, 3) = arr(k, 2)
-                arr_Result(i, 4) = arr(k, 3)
-                arr_Result(i, 5) = cur_Time
-                If i >= myDict(mKey) Then
-                    Exit For
-                End If
-            End If
-        Next k
-        wb.Sheets(1).Range("A11").Resize(myDict(mKey), 5).Value = arr_Result
-        wb.Sheets(1).Columns("A:E").EntireColumn.AutoFit
-        wb.SaveAs Filename:=downldFldr & "\HV Team-BN B Mega SOC\GTC-" & mKey & ".xlsx"
-        wb.Close False
-    Next mKey
-    Application.DisplayAlerts = True
-    Set FSO = Nothing
-    Set myDict = Nothing
-    Set wb = Nothing
-    Shell "explorer.exe" & " " & downldFldr & "\HV Team-BN B Mega SOC", vbNormalFocus
-Application.Calculation = xlCalculationAutomatic
-Application.ScreenUpdating = True
+        Target.Offset(0, 2).Value = cur_Time
+        Target.Offset(0, 2).NumberFormat = "mm/dd/yyyy hh:mm:ss ""s"""
+        i = lr
+        End If
+        Next i
+        If Not data_Exist Then
+        Do
+        Call playalarmsound
+        input_String = InputBox("Please Rescan SEAL or TRACKING NUMBER")
+        If UCase(Left(input_String, 2)) <> "TO" Then
+        Call playdingsound
+        is_Swap = True
+        Target.Value = my_String
+        Target.Offset(0, 1).Value = input_String
+        cur_Time = Now()
+        Target.Offset(0, 2).Value = cur_Time
+        Target.Offset(0, 2).NumberFormat = "mm/dd/yyyy hh:mm:ss ""s"""
+        is_Swap = False
+        End If
+        Loop Until UCase(Left(input_String, 2)) <> "TO"
+        End If
+    Else
+        For i = 1 To lr
+        If UCase(arr_Data(i, 2)) = my_String Then
+        Call playdingsound
+        data_Exist = True
+        is_Swap = True
+        Target.Value = arr_Data(i, 1)
+        Target.Offset(0, 1).Value = my_String
+        cur_Time = Now()
+        Target.Offset(0, 2).Value = cur_Time
+        Target.Offset(0, 2).NumberFormat = "mm/dd/yyyy hh:mm:ss ""s"""
+        i = lr
+        is_Swap = False
+        End If
+        Next i
+        If Not data_Exist Then
+        Do
+        Call playalarmsound
+        input_String = InputBox("Please Rescan TO")
+        If UCase(Left(input_String, 2)) = "TO" Then
+        Call playdingsound
+        is_Swap = True
+        Target.Value = input_String
+        Target.Offset(0, 1).Value = my_String
+        cur_Time = Now()
+        Target.Offset(0, 2).Value = cur_Time
+        Target.Offset(0, 2).NumberFormat = "mm/dd/yyyy hh:mm:ss ""s"""
+        is_Swap = False
+        End If
+        Loop Until UCase(Left(input_String, 2)) = "TO"
+        End If
+        End If
+    Application.Calculation = xlCalculationAutomatic
+    Application.ScreenUpdating = True
+    Application.ActiveWorkbook.Save
+    End If
+End If
+
 End Sub
