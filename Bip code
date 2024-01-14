@@ -1,0 +1,97 @@
+Private Sub Worksheet_Change(ByVal Target As Range)
+If Not is_Swap Then
+    If Target.Column = 1 And Target.Value <> "" Then
+    
+    
+    Call Duplicate_check
+    If is_Duplicate Then
+    Call PlayDuplicateSound
+    Target.Clear
+    Target.Select
+    Exit Sub
+    End If
+    
+    
+    
+    Application.Calculation = xlcalculatonmanual
+    Application.ScreenUpdating = False
+    
+    Dim cur_Time As Date
+    Dim my_String As String
+    Dim input_String As String
+    Dim start_Char As String
+    Dim lr As Long
+    Dim arr_Data()
+    Dim data_Exist As Boolean
+    my_String = UCase(Target.Value)
+    start_Char = Left(my_String, 2)
+    lr = Sheet5.Range("A" & Rows.Count).End(xlUp).Row
+    arr_Data = Sheet5.Range("A1:B" & lr).Value
+    data_Exist = False
+        If start_Char = "TO" Then
+        For i = 1 To lr
+        If UCase(arr_Data(i, 1)) = my_String Then
+        Call playdingsound
+        data_Exist = True
+        Target.Offset(0, 1).Value = arr_Data(i, 2)
+        cur_Time = Now()
+        Target.Offset(0, 2).Value = cur_Time
+        Target.Offset(0, 2).NumberFormat = "mm/dd/yyyy hh:mm:ss ""s"""
+        i = lr
+        End If
+        Next i
+        If Not data_Exist Then
+        Do
+        Call playalarmsound
+        input_String = InputBox("Please Rescan SEAL or TRACKING NUMBER")
+        If UCase(Left(input_String, 2)) <> "TO" Then
+        Call playdingsound
+        is_Swap = True
+        Target.Value = my_String
+        Target.Offset(0, 1).Value = input_String
+        cur_Time = Now()
+        Target.Offset(0, 2).Value = cur_Time
+        Target.Offset(0, 2).NumberFormat = "mm/dd/yyyy hh:mm:ss ""s"""
+        is_Swap = False
+        End If
+        Loop Until UCase(Left(input_String, 2)) <> "TO"
+        End If
+    Else
+        For i = 1 To lr
+        If UCase(arr_Data(i, 2)) = my_String Then
+        Call playdingsound
+        data_Exist = True
+        is_Swap = True
+        Target.Value = arr_Data(i, 1)
+        Target.Offset(0, 1).Value = my_String
+        cur_Time = Now()
+        Target.Offset(0, 2).Value = cur_Time
+        Target.Offset(0, 2).NumberFormat = "mm/dd/yyyy hh:mm:ss ""s"""
+        i = lr
+        is_Swap = False
+        End If
+        Next i
+        If Not data_Exist Then
+        Do
+        Call playalarmsound
+        input_String = InputBox("Please Rescan TO")
+        If UCase(Left(input_String, 2)) = "TO" Then
+        Call playdingsound
+        is_Swap = True
+        Target.Value = input_String
+        Target.Offset(0, 1).Value = my_String
+        cur_Time = Now()
+        Target.Offset(0, 2).Value = cur_Time
+        Target.Offset(0, 2).NumberFormat = "mm/dd/yyyy hh:mm:ss ""s"""
+        is_Swap = False
+        End If
+        Loop Until UCase(Left(input_String, 2)) = "TO"
+        End If
+        End If
+    Application.Calculation = xlCalculationAutomatic
+    Application.ScreenUpdating = True
+    Application.ActiveWorkbook.Save
+    End If
+End If
+
+End Sub
