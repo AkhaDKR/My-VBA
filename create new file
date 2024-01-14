@@ -101,8 +101,8 @@ If Sheet4.Range("A" & lr).Value = "" Then
 End If
 Dim cur_Time As Date
 Dim shifts_Name As String
-cur_Time = Now()
-If Hour(cur_Time) >= 9 And Hour(cur_Time) <= 20 Then
+cur_Time = Now()-(30/(24*60))
+If Hour(cur_Time) >= 9 And Hour(cur_Time) <= 21 Then
    shifts_Name = "INTRA S5 " & Day(cur_Time) & "-" & Month(cur_Time) & "-" & Year(cur_Time)
 Else
    If Hour(cur_Time) >= 0 Then
@@ -116,6 +116,7 @@ Set FSO = CreateObject("Scripting.FileSystemObject")
 
 Dim BBBG_folder As String
 BBBG_folder = "C:\Users\SPXVN10751\Downloads\BBBG GTC"
+dim arr_0()
 Dim arr_1()
 Dim arr_2()
 
@@ -131,8 +132,14 @@ If FSO.FileExists(BBBG_folder & "\" & shifts_Name & ".xlsx") Then
     Set wb = Workbooks.Open(BBBG_folder & "\" & shifts_Name & ".xlsx")
     Dim lr_s1 As Long
     lr_s1 = Get_Lr(wb.Sheets(1), 1)
+   redim arr_0(1 to ubound(arr_1,1),1 to 1)
+   for i=1 to ubound(arr_1,1)
+      arr_0(i,1)=i+(lr_s1-10)
+   next i
+   wb.Sheets(1).Range("A" & lr_s1 + 1).Resize(UBound(arr_1, 1), 1).Value = arr_0
     wb.Sheets(1).Range("B" & lr_s1 + 1).Resize(UBound(arr_1, 1), 2).Value = arr_1
     wb.Sheets(1).Range("E" & lr_s1 + 1).Resize(UBound(arr_2, 1), 1).Value = arr_2
+   wb.Sheets(1).Columns("A:E").EntireColumn.AutoFit
     wb.Save
     wb.Close
 Else
@@ -141,6 +148,6 @@ Else
     wb.Sheets(2).Delete
     wb.Sheets(1).Columns("A:E").EntireColumn.AutoFit
     wb.SaveAs Filename:=BBBG_folder & "\" & shifts_Name & ".xlsx"
-    wb.Close False
+    wb.Close
 End If
 End Sub
