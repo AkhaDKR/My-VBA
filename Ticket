@@ -1,20 +1,35 @@
-Sub Ticket_Check()
-dim arr_Data()
-dim lr_Data as long
-dim file_Dir as string
-dim FSO as object
-set FSO=createobject("Scripting.FileSystemObject")
-dim file as scripting.file
-dim wb as workbook
-file_Dir=environ("UserProfile")
-for each file in file_Dir.files
-   if right(file.name,3)="csv" then
-      file_Dir=file_Dir & "\" & file.name
-      
-   else
-      
-   end if
-next file
-set wb=workbooks.open(file_Dir)
+Sub ticket_Check()
+Application.ScreenUpdating = False
+Application.Calculation = xlCalculationManual
+Dim lr_Data As Long
+Dim arr_Data()
+Dim dic_HVmember As Object
+Set dic_HVmember = CreateObject("Scripting.Dictionary")
+For i = 1 To 8
+    dic_HVmember.Add HVmember.Range("A" & i).Value, i & "OK"
+Next i
+Dim Downloads_Dir As String
+Dim FSO As Object
+Set FSO = CreateObject("Scripting.FileSystemObject")
+Dim m_File As Scripting.fIle
+Dim des_File As Scripting.fIle
+Dim fldr As Scripting.Folder
+Dim wb As Workbook
+Downloads_Dir = Environ("UserProfile") & "\Downloads"
+Set fldr = FSO.GetFolder(Downloads_Dir)
+a = 0
+For Each m_File In fldr.Files
+If Right(m_File.Name, 3) = "csv" Then
+    If m_File.DateLastModified > a Then
+        a = m_File.DateLastModified
+        Set des_File = m_File
+    End If
+End If
+Next m_File
+Set wb = Workbooks.Open(des_File)
+lr_Data = Get_Lr(wb.Sheets(1), 1)
+arr_Data = wb.Sheets(1).Range("A1").CurrentRegion.Value
 
+Application.Calculation = xlCalculationAutomatic
+Application.ScreenUpdating = True
 End Sub
