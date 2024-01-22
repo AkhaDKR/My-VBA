@@ -9,7 +9,8 @@ dim wb as workbook
 file_Dir=environ("UserProfile")
 for each file in file_Dir.files
    if right(file.name,3)="csv" then
-      file_Dir=file_Dir & "\"
+      file_Dir=file_Dir & "\" & file.name
+      
    else
       
    end if
