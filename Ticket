@@ -1,0 +1,19 @@
+Sub Ticket_Check()
+dim arr_Data()
+dim lr_Data as long
+dim file_Dir as string
+dim FSO as object
+set FSO=createobject("Scripting.FileSystemObject")
+dim file as scripting.file
+dim wb as workbook
+file_Dir=environ("UserProfile")
+for each file in file_Dir.files
+   if right(file.name,3)="csv" then
+      file_Dir=file_Dir & "\"
+   else
+      
+   end if
+next file
+set wb=workbooks.open(file_Dir)
+
+End Sub
