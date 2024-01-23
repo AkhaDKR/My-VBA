@@ -32,7 +32,13 @@ Set wb = Workbooks.Open(des_File)
 lr_Data = Get_Lr(wb.Sheets(1), 1)
 arr_Data = wb.Sheets(1).Range("A1").CurrentRegion.Value
 for i=1 to lr_data
-   
+   if dic_HVmember.exists(arr_data(i,3)) then
+      if not dic_HVmember.exists(arr_data(i,8)) then
+        
+      else
+         
+      end if
+   end if
 next i
 Application.Calculation = xlCalculationAutomatic
 Application.ScreenUpdating = True
