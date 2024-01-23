@@ -1,0 +1,43 @@
+Sub check_data()
+Dim files_Count As Integer
+Dim arr_Data()
+Dim arr_FileName()
+Dim downldFldr As String
+Dim m_URL As String
+Dim lr_Data As Long
+Dim dic_Data As Object
+Dim FSO As Object
+download_DONE = False
+Set FSO = CreateObject("Scripting.FileSystemObject")
+Dim my_File As Scripting.fIle
+Set dic_Data = CreateObject("Scripting.Dictionary")
+lr_Data = Get_Lr(Sheet5, 1)
+arr_Data = Sheet5.Range("A1:B" & lr_Data).Value
+downldFldr = Environ("UserProfile")
+For i = lr_Data To 1 Step -1
+    If arr_Data(i, 1) <> "" And Not IsNumeric(arr_Data(i, 2)) And Not dic_Data.Exists(arr_Data(i, 1)) Then
+        m_URL = "https://spx.shopee.vn/api/in-station/general_to/detail/export?to_number=" & arr_Data(i, 1)
+        Shell ("C:\Program Files (x86)\Google\Chrome\Application\chrome.exe -url " & m_URL)
+    End If
+    Sleep (10)
+Next i
+    Do
+        files_Count = 0
+        For Each my_File In FSO.GetFolder(downldFldr).Files
+            If Left(my_File.Name, 9) = "transport" And Right(my_File.Name, 4) = "xlsx" Then
+                files_Count = files_Count + 1
+                arr_FileName(files_Count, 1) = my_File.Name
+            End If
+        Next my_File
+        If files_Count = lr_Data Then
+            download_DONE = True
+        End If
+        If Not download_DONE Then
+            Call show_usf_wolf
+            If Not is_Continus Then
+                Exit Sub
+            End If
+        End If
+        
+    Loop Until download_DONE
+End Sub
