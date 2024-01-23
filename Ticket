@@ -2,11 +2,13 @@ Sub ticket_Check()
 Application.ScreenUpdating = False
 Application.Calculation = xlCalculationManual
 Dim lr_Data As Long
+dim lr_Member as long
 Dim arr_Data()
 Dim dic_HVmember As Object
 Set dic_HVmember = CreateObject("Scripting.Dictionary")
-For i = 1 To 8
-    dic_HVmember.Add HVmember.Range("A" & i).Value, i & "OK"
+lr_Member=get_lr(HVmember,1)
+For i = 1 To lr_Member
+    dic_HVmember.Add HVmember.Range("A" & i).Value, i
 Next i
 Dim Downloads_Dir As String
 Dim FSO As Object
@@ -29,7 +31,9 @@ Next m_File
 Set wb = Workbooks.Open(des_File)
 lr_Data = Get_Lr(wb.Sheets(1), 1)
 arr_Data = wb.Sheets(1).Range("A1").CurrentRegion.Value
-
+for i=1 to lr_data
+   
+next i
 Application.Calculation = xlCalculationAutomatic
 Application.ScreenUpdating = True
 End Sub
