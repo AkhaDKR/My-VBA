@@ -1,12 +1,12 @@
 Sub ticket_Check()
-Application.ScreenUpdating = False
-Application.Calculation = xlCalculationManual
+speed_UP (True)
+Dim items As Variant
 Dim lr_Data As Long
 Dim arr_Data()
 Dim dic_HVmember As Object
 Set dic_HVmember = CreateObject("Scripting.Dictionary")
 For i = 1 To 8
-    dic_HVmember.Add HVmember.Range("A" & i).Value, i & "OK"
+    dic_HVmember.Add HVmember.Range("A" & i).Value, HVmember.Range("A" & i).Value
 Next i
 Dim Downloads_Dir As String
 Dim FSO As Object
@@ -19,17 +19,100 @@ Downloads_Dir = Environ("UserProfile") & "\Downloads"
 Set fldr = FSO.GetFolder(Downloads_Dir)
 a = 0
 For Each m_File In fldr.Files
-If Right(m_File.Name, 3) = "csv" Then
+If Right(m_File.Name, 3) = "csv" And Left(m_File.Name, 13) = "onhold_ticket" Then
     If m_File.DateLastModified > a Then
         a = m_File.DateLastModified
         Set des_File = m_File
     End If
 End If
 Next m_File
+If des_File Is Nothing Then
+    MsgBox "No file"
+    speed_UP (False)
+    Exit Sub
+End If
 Set wb = Workbooks.Open(des_File)
 lr_Data = Get_Lr(wb.Sheets(1), 1)
 arr_Data = wb.Sheets(1).Range("A1").CurrentRegion.Value
+Dim arr_team_Response()
+Dim arr_cs_Response()
+Dim team_Count As Long
+Dim cs_Count As Long
+team_Count = 0
+cs_Count = 0
+For i = 1 To lr_Data
+    If dic_HVmember.Exists(arr_Data(i, 3)) Then
+        If dic_HVmember.Exists(arr_Data(i, 8)) Then
+            team_Count = team_Count + 1
+            ReDim Preserve arr_team_Response(1 To 10, 1 To team_Count)
+            arr_team_Response(1, team_Count) = arr_Data(i, 1)
+            arr_team_Response(2, team_Count) = Round((Now() - arr_Data(i, 2)) * 24, 1) & "H"
+            arr_team_Response(3, team_Count) = arr_Data(i, 3)
+            arr_team_Response(4, team_Count) = arr_Data(i, 4)
+            arr_team_Response(5, team_Count) = arr_Data(i, 8)
+            arr_team_Response(6, team_Count) = Round((Now() - arr_Data(i, 9)) * 24, 1) & "H"
+            arr_team_Response(7, team_Count) = arr_Data(i, 12)
+            arr_team_Response(8, team_Count) = arr_Data(i, 14)
+            arr_team_Response(9, team_Count) = arr_Data(i, 15)
+            arr_team_Response(10, team_Count) = arr_Data(i, 22)
+        Else
+            cs_Count = cs_Count + 1
+            ReDim Preserve arr_cs_Response(1 To 10, 1 To cs_Count)
+            arr_cs_Response(1, cs_Count) = arr_Data(i, 1)
+            arr_cs_Response(2, cs_Count) = Round((Now() - arr_Data(i, 2)) * 24, 1) & "H"
+            arr_cs_Response(3, cs_Count) = arr_Data(i, 3)
+            arr_cs_Response(4, cs_Count) = arr_Data(i, 4)
+            arr_cs_Response(5, cs_Count) = arr_Data(i, 8)
+            arr_cs_Response(6, cs_Count) = Round((Now() - arr_Data(i, 9)) * 24, 1) & "H"
+            arr_cs_Response(7, cs_Count) = arr_Data(i, 12)
+            arr_cs_Response(8, cs_Count) = arr_Data(i, 14)
+            arr_cs_Response(9, cs_Count) = arr_Data(i, 15)
+            arr_cs_Response(10, cs_Count) = arr_Data(i, 22)
+        End If
+    End If
+Next i
+If team_Count > 0 Then
+    a = team_Count
+    ReDim arr_team_rs(0 To a, 1 To 10)
+            arr_team_rs(0, 1) = arr_Data(1, 1)
+            arr_team_rs(0, 2) = arr_Data(1, 2)
+            arr_team_rs(0, 3) = arr_Data(1, 3)
+            arr_team_rs(0, 4) = arr_Data(1, 4)
+            arr_team_rs(0, 5) = arr_Data(1, 8)
+            arr_team_rs(0, 6) = arr_Data(1, 9)
+            arr_team_rs(0, 7) = arr_Data(1, 12)
+            arr_team_rs(0, 8) = arr_Data(1, 14)
+            arr_team_rs(0, 9) = arr_Data(1, 15)
+            arr_team_rs(0, 10) = arr_Data(1, 22)
+    For i = 1 To team_Count
+        For j = 1 To 10
+            arr_team_rs(i, j) = arr_team_Response(j, i)
+        Next j
+    Next i
+sTicket.Range("A1").Resize(team_Count, 10).Value = arr_team_rs
+End If
 
-Application.Calculation = xlCalculationAutomatic
-Application.ScreenUpdating = True
+If cs_Count > 0 Then
+    b = cs_Count
+    ReDim arr_cs_rs(0 To b, 1 To 10)
+            arr_cs_rs(0, 1) = arr_Data(1, 1)
+            arr_cs_rs(0, 2) = arr_Data(1, 2)
+            arr_cs_rs(0, 3) = arr_Data(1, 3)
+            arr_cs_rs(0, 4) = arr_Data(1, 4)
+            arr_cs_rs(0, 5) = arr_Data(1, 8)
+            arr_cs_rs(0, 6) = arr_Data(1, 9)
+            arr_cs_rs(0, 7) = arr_Data(1, 12)
+            arr_cs_rs(0, 8) = arr_Data(1, 14)
+            arr_cs_rs(0, 9) = arr_Data(1, 15)
+            arr_cs_rs(0, 10) = arr_Data(1, 22)
+    For i = 1 To cs_Count
+        For j = 1 To 10
+            arr_cs_rs(i, j) = arr_cs_Response(j, i)
+        Next j
+    Next i
+sTicket.Range("A" & team_Count + 5).Resize(cs_Count, 10).Value = arr_cs_rs
+
+End If
+
+speed_UP (False)
 End Sub
