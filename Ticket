@@ -89,7 +89,7 @@ If team_Count > 0 Then
             arr_team_rs(i, j) = arr_team_Response(j, i)
         Next j
     Next i
-sTicket.Range("A1").Resize(team_Count, 10).Value = arr_team_rs
+sTicket.Range("A1").Resize(team_Count+1, 10).Value = arr_team_rs
 End If
 
 If cs_Count > 0 Then
@@ -110,7 +110,7 @@ If cs_Count > 0 Then
             arr_cs_rs(i, j) = arr_cs_Response(j, i)
         Next j
     Next i
-sTicket.Range("A" & team_Count + 5).Resize(cs_Count, 10).Value = arr_cs_rs
+sTicket.Range("A" & team_Count + 5).Resize(cs_Count+1, 10).Value = arr_cs_rs
 
 End If
 
