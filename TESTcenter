@@ -1,0 +1,7 @@
+Public Function Maxifs_tra_1(CSA, L1, L2)
+Dim rngA, rngB, rngI As Range
+Set rngA = Sheet1.Range("A4:A1000000")
+Set rngB = Sheet1.Range("B4:B1000000")
+Set rngI = Sheet1.Range("I4:I1000000")
+Maxifs_tra_1 = WorksheetFunction.Max(WorksheetFunction.If(WorksheetFunction.And(Rng = CSA, rngB < 1 / 4 * L2 + L1)), rngI)
+End Function
